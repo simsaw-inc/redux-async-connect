@@ -3,7 +3,7 @@ import RouterContext from 'react-router/lib/RouterContext';
 import { beginGlobalLoad, endGlobalLoad } from './asyncConnect';
 import { connect } from 'react-redux';
 
-const { array, func, object, any } = React.PropTypes;
+import PropTypes from 'prop-types';
 
 /**
  * We need to iterate over all components for specified routes.
@@ -51,17 +51,15 @@ let loadDataCounter = 0;
 
 class ReduxAsyncConnect extends React.Component {
   static propTypes = {
-    components: array.isRequired,
-    params: object.isRequired,
-    render: func.isRequired,
-    beginGlobalLoad: func.isRequired,
-    endGlobalLoad: func.isRequired,
-    helpers: any
+    components: PropTypes.array.isRequired,
+    store: PropTypes.object.isRequired,
+    params: PropTypes.object.isRequired,
+    render: PropTypes.func.isRequired,
+    beginGlobalLoad: PropTypes.func.isRequired,
+    endGlobalLoad: PropTypes.func.isRequired,
+    helpers: PropTypes.any
   };
 
-  static contextTypes = {
-    store: object.isRequired
-  };
 
   static defaultProps = {
     render(props) {
@@ -70,11 +68,11 @@ class ReduxAsyncConnect extends React.Component {
   };
 
   isLoaded() {
-    return this.context.store.getState().reduxAsyncConnect.loaded;
+    return this.props.store.getState().reduxAsyncConnect.loaded;
   }
 
-  constructor(props, context) {
-    super(props, context);
+  constructor(props) {
+    super(props);
 
     this.state = {
       propsToShow: this.isLoaded() ? props : null
@@ -89,7 +87,8 @@ class ReduxAsyncConnect extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.loadAsyncData(nextProps);
   }
 
@@ -99,8 +98,9 @@ class ReduxAsyncConnect extends React.Component {
 
   loadAsyncData(props) {
     const { components, params, helpers } = props;
-    const store = this.context.store;
-    const promises = asyncConnectPromises(filterAndFlattenComponents(components), params, store, helpers);
+    const store = this.props.store;
+    const flattened = filterAndFlattenComponents(components);
+    const promises = asyncConnectPromises(flattened, params, store, helpers);
 
     loadDataCounter++;
 
@@ -108,26 +108,27 @@ class ReduxAsyncConnect extends React.Component {
       this.props.beginGlobalLoad();
       (loadDataCounterOriginal => {
         Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ', error))
-            .then(() => {
-              // We need to change propsToShow only if loadAsyncData that called this promise
-              // is the last invocation of loadAsyncData method. Otherwise we can face situation
-              // when user is changing route several times and we finally show him route that has
-              // loaded props last time and not the last called route
-              if (loadDataCounter === loadDataCounterOriginal) {
-                this.setState({propsToShow: props});
-              }
-              this.props.endGlobalLoad();
-            });
+          .then(() => {
+            // We need to change propsToShow only if loadAsyncData that called this promise
+            // is the last invocation of loadAsyncData method. Otherwise we can face situation
+            // when user is changing route several times and we finally show him route that has
+            // loaded props last time and not the last called route
+            if (loadDataCounter === loadDataCounterOriginal) {
+              this.setState({ propsToShow: props });
+            }
+            this.props.endGlobalLoad();
+          });
       })(loadDataCounter);
     } else {
-      this.setState({propsToShow: props});
+      this.setState({ propsToShow: props });
+      this.props.endGlobalLoad();
     }
   }
 
   render() {
-    const {propsToShow} = this.state;
+    const { propsToShow } = this.state;
     return propsToShow && this.props.render(propsToShow);
   }
 }
 
-export default connect(null, {beginGlobalLoad, endGlobalLoad})(ReduxAsyncConnect);
+export default connect(null, { beginGlobalLoad, endGlobalLoad })(ReduxAsyncConnect);

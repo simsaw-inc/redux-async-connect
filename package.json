@@ -1,11 +1,11 @@
 {
-  "name": "redux-async-connect",
-  "version": "0.1.13",
+  "name": "redux-sim-connect",
+  "version": "1.0.1",
   "description": "It allows you to request async data, store them in redux state and connect them to your react component.",
   "main": "lib/index.js",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/Rezonans/redux-async-connect.git"
+    "url": "git+ssh://git@github.com:simsaw-inc/redux-async-connect.git"
   },
   "scripts": {
     "build": "babel ./modules -d lib --ignore '__tests__'",
@@ -28,9 +28,9 @@
   },
   "homepage": "https://github.com/Rezonans/redux-async-connect",
   "peerDependencies": {
-    "react": "0.14.x",
-    "react-router": "2.x.x",
-    "react-redux": "4.x.x"
+    "react": "17.x.x",
+    "react-router": "3.x.x",
+    "react-redux": "7.x.x"
   },
   "devDependencies": {
     "babel-cli": "^6.4.5",
@@ -57,12 +57,14 @@
     "karma-webpack": "^1.7.0",
     "mocha": "^2.0.1",
     "pretty-bytes": "^2.0.1",
-    "react": "^0.14.2",
-    "react-dom": "^0.14.2",
-    "react-router": "2.0.0-rc5",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "react-router": "3.2.6",
+    "react-redux": "7.2.2",
     "rimraf": "^2.4.2",
     "webpack": "^1.12.6",
     "webpack-dev-middleware": "^1.2.0",
-    "eslint-config-airbnb": "^3.1.0"
+    "eslint-config-airbnb": "^3.1.0",
+    "prop-types": "15.7.2"
   }
 }
